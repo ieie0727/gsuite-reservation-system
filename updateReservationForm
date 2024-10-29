@@ -1,0 +1,66 @@
+function updateReservationForm() {
+  const form = FormApp.openById(RESERVATION_FORM_ID);
+  const calendar = RESERVATION_CALENDAR;
+  const currentDate = new Date();
+  const twoWeeksLater = new Date(new Date(currentDate).setDate(currentDate.getDate() + 14));
+  const schoolList = ["A校舎", "B校舎", "C校舎"];  // 校舎のリスト
+
+  // 各校舎の予約枠スロットを初期化
+  const slotsObj = {};  // 校舎ごとの予約枠オブジェクト
+  for (let school of schoolList) {
+    slotsObj[school] = ["該当時間なし"];
+  }
+  slotsObj["全校舎"] = ["該当時間なし"];
+
+  // カレンダーから2週間以内の予約枠を取得し、校舎ごとに分類
+  const events = calendar.getEvents(currentDate, twoWeeksLater);
+  events.forEach(event => {
+    const location = event.getLocation();
+    const startTime = event.getStartTime();
+    const endTime = event.getEndTime();
+    const formattedSlot = formatEventTime(startTime, endTime);
+
+    if (location && schoolList.includes(location)) {
+      slotsObj[location].push(formattedSlot);  // 特定の校舎のスロットに追加
+    } else if (!location) {
+      slotsObj["全校舎"].push(formattedSlot);  // 校舎が指定されていないスロットに追加
+    }
+  });
+
+  // 各校舎の「希望１」と「希望２」にスロットを設定
+  const formItems = form.getItems();
+  const itemTitleIdObject = getItemTitleIdObject(formItems);
+  for (let school of schoolList) {
+    const option1Item = form.getItemById(itemTitleIdObject[`希望１（${school}）`]).asListItem();
+    option1Item.setChoiceValues(slotsObj[school]);
+
+    const option2Item = form.getItemById(itemTitleIdObject[`希望２（${school}）`]).asListItem();
+    option2Item.setChoiceValues(slotsObj["全校舎"]);
+  }
+}
+
+/**
+ * 開始時刻と終了時刻を「M/d(曜日) HH:mm - HH:mm」形式に整形する関数
+ * @param {Date} startTime - 開始日時
+ * @param {Date} endTime - 終了日時
+ * @returns {string} - 整形された日付と時間の文字列
+ */
+function formatEventTime(startTime, endTime) {
+  const daysOfWeek = ["日", "月", "火", "水", "木", "金", "土"];
+  const formattedStartTime = Utilities.formatDate(startTime, "JST", `M/d(${daysOfWeek[startTime.getDay()]}) HH:mm`);
+  const formattedEndTime = Utilities.formatDate(endTime, "JST", ` - HH:mm`);
+  return formattedStartTime + formattedEndTime;
+}
+
+/**
+ * フォーム項目のタイトルとIDをマッピングするオブジェクトを作成する関数
+ * @param {Array} items - フォーム項目のリスト
+ * @returns {Object} - タイトルをキー、IDを値とするオブジェクト
+ */
+function getItemTitleIdObject(items) {
+  const titleToIdObject = {};
+  for (let item of items) {
+    titleToIdObject[item.getTitle()] = item.getId();
+  }
+  return titleToIdObject;
+}
