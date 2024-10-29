@@ -1,0 +1,44 @@
+function bookUnreservedSlots() {
+  const listSheet = RESPONSE_SS.getSheetByName("リスト");
+  const listData = listSheet.getDataRange().getValues();
+  const headerRowIndex = 1;
+  const listDataMap = createMap(listData, headerRowIndex, ["タイムスタンプ", "お名前"]);
+  const reservationStatusColIndex = listData[headerRowIndex - 1].indexOf("予約済");
+
+  for (let [key, record] of listDataMap) {
+    if (record["予約済"]) continue;
+
+    const reservationTitle = `新規面談：${record["お名前"]}`;
+    const startDateTime = convertToDateTime(record["日付"], record["開始時間"]);
+    const endDateTime = convertToDateTime(record["日付"], record["終了時間"]);
+
+    const availableEvents = RESERVATION_CALENDAR.getEvents(startDateTime, endDateTime);
+    const availableSlot = availableEvents.find(event =>
+      event.getTitle() === "予約枠" &&
+      (!event.getLocation() || event.getLocation() === record["校舎"])
+    );
+
+    if (availableSlot) {
+      // 予約枠がある場合、「新規面談（お名前）」に変更し、「予約済」フラグを設定
+      availableSlot.setTitle(reservationTitle);
+      availableSlot.setLocation(record["校舎"]);
+      listSheet.getRange(record.row, reservationStatusColIndex + 1).setValue("予約済");
+    } else {
+      // 予約枠が見つからない場合、エラーメッセージを表示
+      const errorMessage = `指定した時間・場所の予約枠がありません。`;
+      SpreadsheetApp.getUi().alert(errorMessage);
+    }
+  }
+}
+
+/**
+ * 日付と時間の文字列をDateオブジェクトに変換する関数
+ * @param {string} dateStr - 日付文字列
+ * @param {string} timeStr - 時間文字列
+ * @returns {Date} - 指定日時のDateオブジェクト
+ */
+function convertToDateTime(dateStr, timeStr) {
+  const date = new Date(dateStr);
+  const time = new Date(timeStr);
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), time.getHours(), time.getMinutes());
+}
