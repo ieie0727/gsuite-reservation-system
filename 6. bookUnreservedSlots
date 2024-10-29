@@ -1,3 +1,23 @@
+/**
+ * 未予約のスロットに予約を確保する関数
+ * 
+ * 「リスト」シートから未予約のレコードを取得し、指定の日時・校舎に空きの予約枠があるかを確認します。
+ * 該当の予約枠が見つかった場合、イベントタイトルを「新規面談（お名前）」に変更し、予約フラグを「予約済」に設定します。
+ * 該当枠が見つからない場合はエラーメッセージを表示します。
+ * 
+ * フロー：
+ * 1. 「リスト」シートから未予約のデータを取得
+ * 2. 指定の日時・校舎に該当する予約枠をカレンダーから検索
+ * 3. 該当枠が見つかればタイトルと場所を設定し、予約済みフラグを更新
+ * 4. 予約枠が見つからない場合はエラーメッセージを表示
+ * 
+ * 依存関数：
+ * - createMap：シートデータを Map 形式に変換
+ * - convertToDateTime：日付・時間文字列を Date オブジェクトに変換
+ * 
+ * @global {Object} RESPONSE_SS - スプレッドシートオブジェクト
+ * @global {Object} RESERVATION_CALENDAR - Google カレンダーオブジェクト
+ */
 function bookUnreservedSlots() {
   const listSheet = RESPONSE_SS.getSheetByName("リスト");
   const listData = listSheet.getDataRange().getValues();
@@ -33,6 +53,10 @@ function bookUnreservedSlots() {
 
 /**
  * 日付と時間の文字列をDateオブジェクトに変換する関数
+ * 
+ * 日付文字列と時間文字列を組み合わせて Date オブジェクトを作成します。
+ * これにより、指定された日時に基づいたイベントの検索が可能となります。
+ * 
  * @param {string} dateStr - 日付文字列
  * @param {string} timeStr - 時間文字列
  * @returns {Date} - 指定日時のDateオブジェクト
