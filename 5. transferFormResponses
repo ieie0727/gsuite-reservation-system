@@ -1,3 +1,20 @@
+/**
+ * フォームの回答をリストシートに転記する関数
+ * 
+ * 「回答」シートから回答データを取得し、未転記の行のみ「リスト」シートに追加します。
+ * 転記後に「回答」シートの該当行に「転記済み」マークを設定し、次回以降に同じ行が転記されないようにします。
+ * 
+ * フロー：
+ * 1. 「回答」シートからデータを取得し、Map に変換
+ * 2. 未転記のデータを「リスト」シートの末尾に追加
+ * 3. 転記済みのデータには「転記済み」フラグを設定
+ * 
+ * 依存関数：
+ * - createMap：シートのデータを Map 形式に変換
+ * - getLastRowOfSpecificColumn：リストシートの最終行を取得
+ * 
+ * @global {Object} RESPONSE_SS - Google スプレッドシートオブジェクト
+ */
 function transferFormResponses() {
   const responseSheet = RESPONSE_SS.getSheetByName("回答");
   const listSheet = RESPONSE_SS.getSheetByName("リスト");
@@ -38,10 +55,10 @@ function transferFormResponses() {
     ]);
 
     // 「回答」シートに転記済みマークを追加
-    //responseSheet.getRange(`O${response.row}`).setValue("転記済");
+    responseSheet.getRange(`O${response.row}`).setValue("転記済");
   }
 
-  // リストシートの指定列の最終行を取得
+  // リストシートの指定列の最終行を取得し、データを追加
   if (newRows.length > 0) {
     const listData = listSheet.getDataRange().getValues();
     const lastRow = getLastRowOfSpecificColumn(listData, 1);  // 1列目が基準
