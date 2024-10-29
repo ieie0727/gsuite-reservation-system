@@ -1,0 +1,41 @@
+/**
+ * 予約枠を作成して調整する関数
+ * 
+ * createReservationSlot を呼び出し、予約枠を Google カレンダーに作成した後、
+ * handleReservations 関数で予約の処理とフォーム、カレンダーの更新を行います。
+ */
+function createAndArrangeReservationSlots() {
+  createReservationSlot();
+  SpreadsheetApp.flush();
+
+  handleReservations();
+}
+
+/**
+ * フォーム送信時に呼び出される関数
+ * 
+ * Google フォームの回答を「リスト」シートに転記し、予約の処理を行います。
+ * フォーム送信後の自動処理に使用します。
+ */
+function onFormSubmit() {
+  transferFormResponses();
+  SpreadsheetApp.flush();
+
+  handleReservations();
+}
+
+/**
+ * 予約管理を包括的に処理する関数
+ * 
+ * 未予約のスロットを予約し、カレンダーの予約枠の調整や、Google フォームの選択肢更新を行います。
+ * 各ステップでカレンダーやスプレッドシートの更新を行うため、SpreadsheetApp.flush() を使用しています。
+ */
+function handleReservations() {
+  bookUnreservedSlots();
+  SpreadsheetApp.flush();
+
+  adjustReservationCalendar();
+  SpreadsheetApp.flush();
+
+  updateReservationForm();
+}
