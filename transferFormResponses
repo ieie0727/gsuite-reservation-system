@@ -1,0 +1,50 @@
+function transferFormResponses() {
+  const responseSheet = RESPONSE_SS.getSheetByName("回答");
+  const listSheet = RESPONSE_SS.getSheetByName("リスト");
+
+  // 「回答」シートのデータを取得
+  const responseData = responseSheet.getDataRange().getValues();
+  const headerRow = 1;
+  const responseMap = createMap(responseData, headerRow, ["タイムスタンプ", "お名前"]);
+
+  // 追加するデータを格納する配列
+  const newRows = [];
+
+  // 「回答」シートのデータをチェックし、未転記の行を「リスト」シートに追加
+  for (let [key, response] of responseMap) {
+    // 転記済みは飛ばす
+    if (response["転記済"]) continue;
+
+    const school = response["希望校舎"];
+    const dateAndTime = response[`希望１（${school}）`] || response[`希望２（${school}）`];
+
+    let date, timeRange, startTime, endTime;
+    if (dateAndTime) {
+      // 日付と時間の分割
+      [date, timeRange] = dateAndTime.split(" ");
+      [startTime, endTime] = timeRange.split(" - ");
+    }
+
+    // 新しい行を newRows に追加
+    newRows.push([
+      response["タイムスタンプ"],
+      response["お名前"],
+      response["希望校舎"],
+      date,
+      startTime,
+      endTime,
+      response[`希望３（${school}）`],
+      response["その他、ご要望"]
+    ]);
+
+    // 「回答」シートに転記済みマークを追加
+    //responseSheet.getRange(`O${response.row}`).setValue("転記済");
+  }
+
+  // リストシートの指定列の最終行を取得
+  if (newRows.length > 0) {
+    const listData = listSheet.getDataRange().getValues();
+    const lastRow = getLastRowOfSpecificColumn(listData, 1);  // 1列目が基準
+    listSheet.getRange(lastRow + 1, 1, newRows.length, newRows[0].length).setValues(newRows);
+  }
+}
