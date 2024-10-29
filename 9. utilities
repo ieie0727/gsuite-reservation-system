@@ -1,0 +1,63 @@
+/**
+ * 与えられたデータとキーワードに基づき、オブジェクトをキーにしたMapを作成する関数
+ * 
+ * 指定されたキーワードを基に一意のキーを生成し、それを基に Map を作成します。
+ * 各行のデータをオブジェクトとして格納し、Map には生成したキーとそのオブジェクトのペアが設定されます。
+ * 
+ * @param {Array} values - 二次元配列で、各行がオブジェクトのフィールド値を含む
+ * @param {number} indexRow - ヘッダー行のインデックス（デフォルトは1）
+ * @param {Array} keywords - キーを生成する際に使用するカラムの名前リスト
+ * @returns {Map} - キーとオブジェクトのペアを持つ Map オブジェクト
+ */
+function createMap(values, indexRow = 1, keywords) {
+  const map = new Map();
+  const headers = values[indexRow - 1];
+
+  // データ行をループ処理
+  for (let i = indexRow; i < values.length; i++) {
+    const rowValues = values[i];
+    const obj = { 'row': i + 1 };
+
+    // ヘッダーに基づいてオブジェクトのプロパティを設定
+    for (let j in headers) {
+      obj[headers[j]] = rowValues[j];
+    }
+
+    // キーワードに基づいてキーを生成
+    const keyParts = [];
+    for (let keyword of keywords) {
+      if (obj[keyword]) {
+        keyParts.push(obj[keyword]);
+      }
+    }
+
+    // mapに追加
+    if (keyParts.length) {
+      const key = keyParts.join("_");
+      map.set(key, obj);
+    }
+  }
+
+  return map; // 完成した Map を返す
+}
+
+/**
+ * 指定した列の最終行を取得する関数
+ * 
+ * 指定された列を基準に、最後にデータが入力されている行を取得します。
+ * データが存在しない場合は1行目を返します。
+ * 
+ * @param {Array<Array>} values - シートから取得した二次元配列
+ * @param {Number} col - 基準とする列の番号（1から始まる）
+ * @return {Number} - 指定列の最終行のインデックス（1から始まる）
+ */
+function getLastRowOfSpecificColumn(values, col) {
+  if (values.length === 1 || values[1][col - 1] == "") {
+    return 1;
+  }
+  for (let i = values.length - 1; i > 0; i--) {
+    if (values[i][col - 1] !== "") {
+      return Number(i) + 1;
+    }
+  }
+}
