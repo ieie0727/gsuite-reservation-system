@@ -8,9 +8,9 @@
 - **スプレッドシート記録**: 予約済みデータの記録と更新をスプレッドシート上で行い、必要な情報を集約。
 
 ## 実際のデモ
-- **フォームリンク**: 実際の予約フォームをご確認ください [こちらをクリック](#)
-- **スプレッドシートリンク**: 予約データ管理用のスプレッドシート [こちらをクリック](#)
-- **Google カレンダーリンク**: カレンダー上での予約枠と予約状況を確認 [こちらをクリック](#)
+- **フォームリンク**: [予約フォーム](https://docs.google.com/forms/d/e/1FAIpQLSfMzRGx8dZRRZBbHF2YIM0G3unfJ0buGevljIzsaPDCDlpbhQ/viewform)
+- **スプレッドシートリンク**:  [予約データ管理用のスプレッドシート](https://docs.google.com/spreadsheets/d/14Tmpp6AVqg7R4aa1U3kV-pYgWPeA1aEURhHRWQebXDo/edit?gid=1243878587#gid=1243878587)
+- **Google カレンダーリンク**: カレンダー上での予約枠と予約状況を確認 [予約カレンダー](https://calendar.google.com/calendar/u/0?cid=OWU0YmFlMTg0MjU2MGUzM2YyNTI0NDNjZDU4ZjcwOTgzNjBiMDBiODMzZDFlMDQyODQ2ZWMyMzEzYzMyYWRhYUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t)　[代表カレンダー](https://calendar.google.com/calendar/u/0?cid=MjI0MDEyYWRjZmNjN2UwM2NiZjY0YTRhZDZjMzEzNWMzODkyY2MwMmFhYmI0NGJmZjcwNzdjN2NlYmJjMDE2MUBncm91cC5jYWxlbmRhci5nb29nbGUuY29t)
 
 > ※各リンクはポートフォリオ閲覧用に設定しているため、編集権限がありません。データの閲覧と操作のみご覧いただけます。
 
