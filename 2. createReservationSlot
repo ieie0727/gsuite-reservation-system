@@ -1,0 +1,43 @@
+/**
+ * 予約枠を Google カレンダーに作成する関数
+ * 
+ * 「予約枠作成」シートから日付と時間情報を取得し、予約枠を Google カレンダーに追加します。
+ * すでに「作成済」フラグが付いている予約枠はスキップされ、未作成の枠のみを新規に作成します。
+ * 作成済みの予約枠には「済」のフラグを付け、再度の処理を防止します。
+ * 
+ * フロー：
+ * 1. 予約枠データを「予約枠作成」シートから取得し、Map に変換
+ * 2. 未作成の予約枠データをカレンダーに新規作成
+ * 3. 作成済みの予約枠に「済」フラグを付与
+ * 
+ * 定数：
+ * - `createdFlagCol`（作成済みフラグのカラム）：1
+ * 
+ * 依存関数：
+ * - createMap：シートデータを Map 形式に変換するために使用
+ * 
+ * @global {Object} RESPONSE_SS - スプレッドシートオブジェクト
+ * @global {Object} RESERVATION_CALENDAR - Google カレンダーオブジェクト
+ */
+function createReservationSlot() {
+  // 定義
+  const reservationSheet = RESPONSE_SS.getSheetByName("予約枠作成");
+  const reservationValues = reservationSheet.getDataRange().getValues();
+  const reservationMap = createMap(reservationValues, 1, ["日付", "開始時間", "終了時間"]);
+  const createdFlagCol = 1;
+
+  for (let obj of reservationMap.values()) {
+    // すでに作成済の予約枠はスキップ
+    if (obj["作成済"]) continue;
+
+    // 日付と時間を整形して予約枠を作成
+    const date = Utilities.formatDate(obj["日付"], "JST", "yyyy/MM/dd");
+    const startTime = Utilities.formatDate(obj["開始時間"], "JST", "HH:mm");
+    const endTime = Utilities.formatDate(obj["終了時間"], "JST", "HH:mm");
+    console.log(date, startTime, endTime);
+    RESERVATION_CALENDAR.createEvent("予約枠", new Date(`${date} ${startTime}`), new Date(`${date} ${endTime}`));
+
+    // フラグを付ける
+    reservationSheet.getRange(obj.row, createdFlagCol).setValue("済");
+  }
+}
