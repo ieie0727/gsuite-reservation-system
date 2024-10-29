@@ -1,0 +1,24 @@
+function createReservationSlot() {
+  //定義
+  const resevationSheet = RESPONSE_SS.getSheetByName("予約枠作成");
+  const resevationValues = resevationSheet.getDataRange().getValues();
+  const resevationMap = createMap(resevationValues, 1, ["日付", "開始時間", "終了時間"]);
+  const createdFlagCol = 1;
+
+  for (let obj of resevationMap.values()) {
+    //ガード句
+    if (obj["作成済"]) { continue; }
+
+    //日時調整して作成
+    const date = Utilities.formatDate(obj["日付"], "JST", "yyyy/MM/dd");
+    const startTime = Utilities.formatDate(obj["開始時間"], "JST", "HH:mm");
+    const endTime = Utilities.formatDate(obj["終了時間"], "JST", "HH:mm");
+    console.log(date,startTime,endTime);
+    RESERVATION_CALENDAR.createEvent("予約枠", new Date(`${date} ${startTime}`), new Date(`${date} ${endTime}`));
+
+    //フラグを付ける
+    resevationSheet.getRange(obj.row, createdFlagCol).setValue("済");
+  }
+}
+
+
