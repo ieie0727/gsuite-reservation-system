@@ -1,3 +1,21 @@
+/**
+ * Google フォームの予約枠選択肢を Google カレンダーの予約枠データで更新する関数
+ * 
+ * 「希望１」には校舎ごとの予約枠、「希望２」には全校舎の予約枠を設定します。
+ * Google カレンダーから取得した予約枠を校舎ごとに分類し、2週間以内のスロットをフォームに設定します。
+ * 
+ * フロー：
+ * 1. 各校舎と全校舎のスロットオブジェクトを初期化
+ * 2. 2週間以内の予約枠イベントを取得し、校舎ごとに分類
+ * 3. 各校舎ごとに「希望１」「希望２」の項目へスロットを設定
+ * 
+ * 依存関数：
+ * - formatEventTime：イベントの開始終了時刻を整形
+ * - getItemTitleIdObject：フォーム項目のタイトルと ID を取得
+ * 
+ * @global {Object} RESERVATION_FORM_ID - フォームの ID
+ * @global {Object} RESERVATION_CALENDAR - Google カレンダーオブジェクト
+ */
 function updateReservationForm() {
   const form = FormApp.openById(RESERVATION_FORM_ID);
   const calendar = RESERVATION_CALENDAR;
@@ -41,6 +59,7 @@ function updateReservationForm() {
 
 /**
  * 開始時刻と終了時刻を「M/d(曜日) HH:mm - HH:mm」形式に整形する関数
+ * 
  * @param {Date} startTime - 開始日時
  * @param {Date} endTime - 終了日時
  * @returns {string} - 整形された日付と時間の文字列
@@ -54,6 +73,10 @@ function formatEventTime(startTime, endTime) {
 
 /**
  * フォーム項目のタイトルとIDをマッピングするオブジェクトを作成する関数
+ * 
+ * フォーム項目リストを取得し、タイトルをキー、IDを値とするオブジェクトを生成します。
+ * このマッピングにより、特定のフォーム項目のIDを簡単に取得できます。
+ * 
  * @param {Array} items - フォーム項目のリスト
  * @returns {Object} - タイトルをキー、IDを値とするオブジェクト
  */
