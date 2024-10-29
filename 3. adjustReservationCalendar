@@ -1,8 +1,25 @@
+/**
+ * Google カレンダーの予約枠を調整する関数
+ * 
+ * 社長の予定と予約枠を統合して重複や前後の配置を調整し、不要な予約枠を削除します。
+ * 指定期間内のイベントを取得して開始時刻でソートし、重複や適切な場所設定を行います。
+ * 
+ * フロー：
+ * 1. 社長の予定と予約枠のイベントを統合し、開始時刻でソート
+ * 2. 予約枠が他のイベントと重複している場合は削除フラグを設定
+ * 3. 前後のイベントの配置を基に、予約枠の場所を設定または削除
+ * 4. 削除フラグが立った予約枠を削除
+ * 
+ * 依存関数：
+ * - createEventArray：イベントオブジェクトを配列に変換
+ * - getNearbyEvents：前後20分以内の予約枠以外のイベントを取得
+ * - determineLocationFromSurroundingEvents：前後のイベントに基づき、予約枠の場所を調整
+ */
 function adjustReservationCalendar() {
   const currentDate = new Date();
   const oneMonthLater = new Date(new Date(currentDate).setDate(currentDate.getDate() + 30));
 
-  // 予約枠と社長の予定を統合し、開始時刻でソート
+  // 社長の予定と予約枠を統合し、開始時刻でソート
   let allEvents = [...PRESIDENT_CALENDAR.getEvents(currentDate, oneMonthLater), ...RESERVATION_CALENDAR.getEvents(currentDate, oneMonthLater)];
   allEvents = createEventArray(allEvents).sort((a, b) => a.startTime - b.startTime);
 
@@ -38,6 +55,7 @@ function adjustReservationCalendar() {
 
 /**
  * イベントオブジェクトを配列に変換し、flagプロパティをデフォルトでtrueに設定
+ * 
  * @param {Array} events - イベントのリスト
  * @returns {Array} - イベントオブジェクトの配列
  */
@@ -56,6 +74,7 @@ function createEventArray(events) {
 
 /**
  * 前後の「予約枠以外の予定」を取得
+ * 
  * @param {Array} allEvents - ソート済みのイベント配列
  * @param {number} index - チェック対象のインデックス
  * @param {number} minutes - 前後の時間範囲（分単位）
@@ -63,16 +82,13 @@ function createEventArray(events) {
  */
 function getNearbyEvents(allEvents, index, minutes) {
   const rangeMillis = minutes * 60 * 1000;
-  let previousEvent = {location:null};
-  let nextEvent = {location:null};
+  let previousEvent = { location: null };
+  let nextEvent = { location: null };
 
   // 前の予定を探索
   for (let i = index - 1; i >= 0; i--) {
     const event = allEvents[i];
-    // 現在のイベントの20分範囲外ならbreak
-    if (allEvents[index].startTime - event.endTime > rangeMillis) {
-      break;
-    }
+    if (allEvents[index].startTime - event.endTime > rangeMillis) break;
     if (event.flag && event.title !== "予約枠") {
       previousEvent = event;
       break;
@@ -82,10 +98,7 @@ function getNearbyEvents(allEvents, index, minutes) {
   // 次の予定を探索
   for (let i = index + 1; i < allEvents.length; i++) {
     const event = allEvents[i];
-    // 現在のイベントの20分範囲外ならbreak
-    if (event.startTime - allEvents[index].endTime > rangeMillis) {
-      break;
-    }
+    if (event.startTime - allEvents[index].endTime > rangeMillis) break;
     if (event.flag && event.title !== "予約枠") {
       nextEvent = event;
       break;
@@ -95,9 +108,9 @@ function getNearbyEvents(allEvents, index, minutes) {
   return { previous: previousEvent, next: nextEvent };
 }
 
-
 /**
  * 前後のイベントに基づき、予約枠の場所を設定または削除
+ * 
  * @param {Object} targetSlot - チェック対象の予約枠
  * @param {Object} previous - 前の予定のオブジェクト（場所がある場合のみ）
  * @param {Object} next - 次の予定のオブジェクト（場所がある場合のみ）
@@ -106,12 +119,10 @@ function getNearbyEvents(allEvents, index, minutes) {
 function determineLocationFromSurroundingEvents(targetSlot, previous, next) {
   // previousとnextのどちらにも場所が入っている
   if (previous.location && next.location) {
-    // 1. previousとnextが異なる場所の場合、targetSlotを削除
     if (previous.location !== next.location) {
       return false;
     }
 
-    // 2. previousとnextに同じ場所の場合、targetSlotを同じ場所に固定
     if (previous.location === next.location) {
       const targetEvent = RESERVATION_CALENDAR.getEventById(targetSlot.id);
       targetEvent.setLocation(previous.location);
@@ -120,7 +131,6 @@ function determineLocationFromSurroundingEvents(targetSlot, previous, next) {
     }
   }
 
-  // 3. 前または後の場所がnullで、もう片方に場所が入っている場合、その場所に従う
   if (previous.location) {
     const targetEvent = RESERVATION_CALENDAR.getEventById(targetSlot.id);
     targetEvent.setLocation(previous.location);
@@ -135,7 +145,6 @@ function determineLocationFromSurroundingEvents(targetSlot, previous, next) {
     return true;
   }
 
-  // 4. 前後のイベントまたは場所がどちらもnullの場合、場所は自由のままでOK
   if (targetSlot.location) {
     const targetEvent = RESERVATION_CALENDAR.getEventById(targetSlot.id);
     targetEvent.setLocation(null);
@@ -148,6 +157,7 @@ function determineLocationFromSurroundingEvents(targetSlot, previous, next) {
 
 /**
  * 2つのイベントの時間が重なっているか確認
+ * 
  * @param {Object} event1 - チェック対象のイベント1
  * @param {Object} event2 - チェック対象のイベント2
  * @returns {boolean} - 重複している場合はtrue
