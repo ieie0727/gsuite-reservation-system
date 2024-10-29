@@ -1,0 +1,20 @@
+function onOpen() {
+  const ui = SpreadsheetApp.getUi();
+  const menu = ui.createMenu("実行ボタン");
+  menu.addItem("予約枠作成", "createAndArrangeReservationSlots"); //表示名と関数名
+  menu.addItem("面談予約","handleReservations");
+  menu.addToUi();
+}
+
+//定義
+const RESERVATION_CALENDAR_ID = "9e4bae1842560e33f252443cd58f7098360b00b833d1e042846ec2313c32adaa@group.calendar.google.com";
+const RESERVATION_CALENDAR = CalendarApp.getCalendarById(RESERVATION_CALENDAR_ID);
+
+const PRESIDENT_CALENDAR_ID = "224012adcfcc7e03cbf64a4ad6c3135c3892cc02aabb44bff7077c7cebbc0161@group.calendar.google.com";
+const PRESIDENT_CALENDAR = CalendarApp.getCalendarById(PRESIDENT_CALENDAR_ID);
+
+const RESPONSE_SS_ID = "14Tmpp6AVqg7R4aa1U3kV-pYgWPeA1aEURhHRWQebXDo";
+const RESPONSE_SS = SpreadsheetApp.openById(RESPONSE_SS_ID);
+
+const RESERVATION_FORM_ID = "1mhCC1yDZHv-WOEU0JzM9ziRANou3T9jB5kOug80fbWY";
+const RESERVATION_FORM = FormApp.openById(RESERVATION_FORM_ID);
